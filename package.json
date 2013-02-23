@@ -1,5 +1,5 @@
 {
-  "name": "pusher",
+  "name": "dozer",
   "version": "0.0.0",
   "description": "Push Notification Service",
   "main": "index.js",
@@ -15,5 +15,5 @@
   },
   "repository": "",
   "author": "",
-  "license": "BSD"
+  "license": ""
 }
