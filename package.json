@@ -6,7 +6,8 @@
   "dependencies": {
     "apn": "1.2.5",
     "node-uuid": "~1.4.0",
-    "redis": "~0.8.2"
+    "redis": "~0.8.2",
+    "winston": "~0.6.2"
   },
   "devDependencies": {},
   "scripts": {

@@ -1,5 +1,6 @@
 var apns = require('apn'),
-    uuid = require('node-uuid');
+    uuid = require('node-uuid'),
+    log  = require('../log');
 
 
 // place to hold status for open connections
@@ -10,7 +11,7 @@ function errorCallback(err, options) {
   var connection = status[options.uuid];
 
   if (connection === undefined) {
-    console.warn("ERROR but no connection.");
+    log.warn("errorCallback called but no connection information: " + options.uuid);
     return;
   }
 

@@ -1,12 +1,16 @@
 var http  = require('http'),
     apns  = require('./notification/apple'),
     redis = require('redis'),
-    qs    = require('querystring');
+    qs    = require('querystring'),
+    log   = require('./log');
+
+
+var config = require('./config.json');
 
 
 var redisClient = redis.createClient();
 redisClient.on("error", function (err) {
-  console.log("Redis Error: " + err);
+  log.error("Redis Error: " + err);
 });
 
 function handlePostData (request, response, callback) {
@@ -93,4 +97,4 @@ var server = http.createServer(function (request, response) {
   }
 });
 
-server.listen(8080);
+server.listen(config.port ? config.port : 8080);

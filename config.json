@@ -1,0 +1,10 @@
+{
+  "port": 8080,
+  "logging": {
+    "type": [
+      {
+        "console": true
+      }
+    ]
+  }
+}
