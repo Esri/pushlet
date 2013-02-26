@@ -84,6 +84,8 @@ function handleMessage (request, response) {
       response.end(JSON.stringify({ "response": "error", "error": "deviceId required" }));
     } else if (request.body.mode === undefined) {
       response.end(JSON.stringify({ "response": "error", "error": "mode required" }));
+    } else if (request.body.payload === undefined) {
+      response.end(JSON.stringify({ "response": "error", "error": "payload required" }));
     } else {
       // if we do not have a timeout, set the default
       if (request.body.timeout === undefined) {
