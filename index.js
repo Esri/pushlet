@@ -8,7 +8,11 @@ var http  = require('http'),
 var config = require('./config.json');
 
 
-var redisClient = redis.createClient();
+// set up redis
+var port = config.redis.port || 6379,
+    host = config.redis.host || 'localhost';
+
+var redisClient = redis.createClient(port, host);
 redisClient.on("error", function (err) {
   log.error("Redis Error: " + err);
 });
@@ -60,9 +64,14 @@ function handleNewAuth (request, response) {
       cert  = request.body.cert,
       key   = request.body.key;
 
-  redisClient.multi([ [ "mset", appId + "_" + mode + "_cert", cert, appId + "_" + mode + "_key", key ]]).exec(function (err, replies) {
+  // check state of redis
+  if (redisClient && redisClient.connected) {
+    redisClient.multi([ [ "mset", appId + "_" + mode + "_cert", cert, appId + "_" + mode + "_key", key ]]).exec(function (err, replies) {
+      sendMessage(request, response);
+    });
+  } else {
     sendMessage(request, response);
-  });
+  }
 }
 
 function handleMessage (request, response) {

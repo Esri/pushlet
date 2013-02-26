@@ -6,6 +6,18 @@ var apns = require('apn'),
 // place to hold status for open connections
 var status = { };
 
+var errorMap = {
+  1: "Processing Error",
+  2: "Missing Device Token",
+  3: "Missing Topic",
+  4: "Missing Payload",
+  5: "Invalid Token Size",
+  6: "Invalid Topic Size",
+  7: "Invalid Payload Size",
+  8: "Invalid Token",
+  255: "Unknown Error"
+};
+
 // callback from sendMesage error callback, known error state
 function errorCallback(err, options) {
   var connection = status[options.uuid];
@@ -17,7 +29,14 @@ function errorCallback(err, options) {
 
   var response = connection.response;
 
-  response.end(JSON.stringify({ response: "error", error: err }));
+  if (err) {
+    // known error state, handle it normally
+    response.end(JSON.stringify({ response: "error", error: errorMap[err] }));
+  } else {
+    // whoa, something weird happened, log it and return a result
+    log.warn("errorCallback returned with unknown error: " + err);
+    response.end(JSON.stringifu({ response: "error", error: "Unknown" }));
+  }
   status[options.id] = undefined;
 }
 
@@ -93,7 +112,5 @@ function sendMessage(request, response, payload, options) {
   // send the notification
   connection.sendNotification(notification);
 }
-
-
 
 exports.sendMessage = sendMessage;
