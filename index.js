@@ -85,6 +85,11 @@ function handleMessage (request, response) {
     } else if (request.body.mode === undefined) {
       response.end(JSON.stringify({ "response": "error", "error": "mode required" }));
     } else {
+      // if we do not have a timeout, set the default
+      if (request.body.timeout === undefined) {
+        request.body.timeout = config.timeout;
+      }
+
       // update the certificate
       if (request.body.cert !== undefined && request.body.key !== undefined) {
         handleNewAuth(request, response);

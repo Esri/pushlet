@@ -2,7 +2,18 @@
 
 APN Notification Service.
 
-## TODO
+## API Endpoint
 
-* Translate Errors
-* Better Documentation
+`POST /message`
+
+* appId - required
+* deviceId - required
+* mode - required (sandbox or production)
+* cert - optional
+* key - optional
+* notification - required
+   * payload - required
+   * payload.badge - optional
+   * payload.sound - optional
+   * payload.alert - optional
+* timeout - optional (default 1000 ms)

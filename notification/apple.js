@@ -49,13 +49,18 @@ function notificationCallback(id) {
     // nothing to see here, the error handler has already
     // handled this connection
   } else {
-    var response = status[id].response;
+    var response = status[id].response,
+        request  = status[id].request;
 
     // clear it now from status
     status[id] = undefined;
 
-    // send the final "ok"
-    response.end(JSON.stringify({ response: "ok" }));
+    // if we have a timeout of "0", just notify that we sent it
+    if (request.body.timeout === 0) {
+      response.end(JSON.stringify({ response: "sent" }));
+    } else {
+      response.end(JSON.stringify({ response: "ok" }));
+    }
   }
 }
 
@@ -107,7 +112,7 @@ function sendMessage(request, response, payload, options) {
   // set a timeout to check to see if an error occurred
   setTimeout(function () {
     notificationCallback(options.uuid);
-  }, 1000);
+  }, request.body.timeout);
 
   // send the notification
   connection.sendNotification(notification);
