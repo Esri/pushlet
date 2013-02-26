@@ -111,7 +111,7 @@ function sendMessage(request, response, payload, options) {
 
   // set a timeout to check to see if an error occurred
   setTimeout(function () {
-    notificationCallback(options.uuid);
+    notificationCallback(notification.uuid);
   }, request.body.timeout);
 
   // send the notification
