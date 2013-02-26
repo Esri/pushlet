@@ -25,7 +25,12 @@ function handlePostData (request, response, callback) {
   });
 
   request.on('end', function (){
-    request.body = qs.parse(body);
+    try {
+      request.body = JSON.parse(body);
+    } catch (err) {
+      response.end(JSON.stringify({ "status": "error", "error": "Unknow JSON" }));
+      return;
+    }
 
     callback(request, response);
   });
