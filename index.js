@@ -37,11 +37,14 @@ function handlePostData (request, response, callback) {
 }
 
 function sendMessage(request, response) {
+  var timeout = config.connectionTimeout || 1000;
+
   var options = {
     certData: request.body.cert,
     keyData: request.body.key,
     deviceId: request.body.deviceId,
-    mode: request.body.mode
+    mode: request.body.mode,
+    connectionTimeout: timeout
   };
 
   apns.sendMessage(request, response, request.body.notification, options);

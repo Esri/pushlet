@@ -11,5 +11,6 @@
     "port": 6379,
     "host": "localhost"
   },
-  "timeout": 1000
+  "timeout": 1000,
+  "connectionTimeout": 60000
 }

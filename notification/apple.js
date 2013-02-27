@@ -6,6 +6,8 @@ var apns = require('apn'),
 // place to hold status for open connections
 var status = { };
 
+var connections = { };
+
 var errorMap = {
   1: "Processing Error",
   2: "Missing Device Token",
@@ -15,26 +17,64 @@ var errorMap = {
   6: "Invalid Topic Size",
   7: "Invalid Payload Size",
   8: "Invalid Token",
+  23: "Bad Certificate",
   255: "Unknown Error"
 };
+
+
+// get a connection from the pool if possible, otherwise create a new connection
+function getConnection (name, options) {
+  var connection = connections[name];
+
+  // if there is no connection, create a new one
+  if (connection === undefined) {
+    options.name = name;
+
+    connection = new apns.Connection(options);
+
+    connection.on('disconnected', function () {
+      // remove the connection from the connection pool
+      if (this.options && this.options.name) {
+        connections[this.options.name] = undefined;
+      }
+    });
+
+    connection.on('error', function () {
+      // remove the connection from the connection pool
+      if (this.options && this.options.name) {
+        connections[this.options.name] = undefined;
+      }
+    });
+
+    connections[name] = connection;
+  }
+
+  return connection;
+}
+
 
 // callback from sendMesage error callback, known error state
 function errorCallback(err, options) {
   var connection = status[options.uuid];
 
   if (connection === undefined) {
-    log.warn("errorCallback called but no connection information: " + options.uuid);
+    log.log('warn', "errorCallback called but no connection information: " + options.uuid);
     return;
   }
 
   var response = connection.response;
 
   if (err) {
+    // check for bad certificate, set it to our known error if it is the case
+    if (err.toString().indexOf("PEM") !== -1) {
+      err = 23;
+    }
+
     // known error state, handle it normally
     response.end(JSON.stringify({ response: "error", error: errorMap[err] }));
   } else {
     // whoa, something weird happened, log it and return a result
-    log.warn("errorCallback returned with unknown error: " + err);
+    log.log('warn', "errorCallback returned with unknown error: " + err);
     response.end(JSON.stringifu({ response: "error", error: "Unknown" }));
   }
   status[options.id] = undefined;
@@ -68,7 +108,7 @@ function sendMessage(request, response, payload, options) {
   // set up the connection options
   options.enhanced = true;
   options.errorCallback = errorCallback;
-  options.cacheLength = 1;
+  options.cacheLength = 256;
   options.debug = true;
 
   if (request.body.mode === 'production') {
@@ -107,7 +147,7 @@ function sendMessage(request, response, payload, options) {
 
   notification.device = new apns.Device(request.body.deviceId);
 
-  var connection = new apns.Connection(options);
+  var connection = getConnection(request.body.appId + "_" + request.body.mode, options);
 
   // set a timeout to check to see if an error occurred
   setTimeout(function () {
