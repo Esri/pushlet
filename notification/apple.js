@@ -1,6 +1,6 @@
 var apns = require('apn'),
     uuid = require('node-uuid'),
-    log  = require('../log');
+    log  = require('../log').logger;
 
 
 // place to hold status for open connections
@@ -30,9 +30,12 @@ function getConnection (name, options) {
   if (connection === undefined) {
     options.name = name;
 
+    log.debug("Establishing new connection for "+options.name);
+
     connection = new apns.Connection(options);
 
     connection.on('disconnected', function () {
+      log.info(this.options.name + " disconnected");
       // remove the connection from the connection pool
       if (this.options && this.options.name) {
         connections[this.options.name] = undefined;
@@ -40,6 +43,7 @@ function getConnection (name, options) {
     });
 
     connection.on('error', function () {
+      log.warn("Connection error for "+this.options.name);
       // remove the connection from the connection pool
       if (this.options && this.options.name) {
         connections[this.options.name] = undefined;
@@ -47,6 +51,8 @@ function getConnection (name, options) {
     });
 
     connections[name] = connection;
+  } else {
+    log.debug("Found existing connection for "+name);
   }
 
   return connection;
@@ -58,7 +64,7 @@ function errorCallback(err, options) {
   var connection = status[options.uuid];
 
   if (connection === undefined) {
-    log.log('warn', "errorCallback called but no connection information: " + options.uuid);
+    log.warn("errorCallback called but no connection information: " + options.uuid);
     return;
   }
 
@@ -74,8 +80,8 @@ function errorCallback(err, options) {
     response.end(JSON.stringify({ response: "error", error: errorMap[err] }));
   } else {
     // whoa, something weird happened, log it and return a result
-    log.log('warn', "errorCallback returned with unknown error: " + err);
-    response.end(JSON.stringifu({ response: "error", error: "Unknown" }));
+    log.warn("errorCallback returned with unknown error: " + err);
+    response.end(JSON.stringify({ response: "error", error: "Unknown" }));
   }
   status[options.id] = undefined;
 }

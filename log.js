@@ -16,4 +16,4 @@ var logger = new (winston.Logger)({
   transports: transports
 });
 
-exports = logger;
+exports.logger = logger;
