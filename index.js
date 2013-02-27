@@ -52,10 +52,10 @@ function handleExistingAuth (request, response) {
       mode  = request.body.mode;
 
   redisClient.multi([ [ "mget", appId + "_" + mode + "_cert", appId + "_" + mode + "_key" ]]).exec(function (err, replies) {
-    if (replies === undefined || replies.length !== 1 || replies.length[0] !== 2 || replies[0][0] === null || replies[0][1] === null) {
+    if (replies === undefined || replies.length !== 1 || replies[0].length !== 2 || replies[0][0] === null || replies[0][1] === null) {
       response.end(JSON.stringify({ "response": "error", "error": "missing certificate" }));
     } else {
-      request.body.cert = replies[0][1];
+      request.body.cert = replies[0][0];
       request.body.key = replies[0][1];
 
       sendMessage(request, response);
