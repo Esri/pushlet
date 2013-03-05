@@ -1,6 +1,20 @@
 var apns = require('apn'),
     uuid = require('node-uuid'),
-    log  = require('../log').logger;
+    log  = require('../log').logger,
+    redis = require('redis');
+
+var config = require('../config.json');
+
+
+// set up redis
+var port = config.redis.port || 6379,
+    host = config.redis.host || 'localhost';
+
+var redisClient = redis.createClient(port, host);
+redisClient.on("error", function (err) {
+  log.error("Redis Error: " + err);
+});
+
 
 
 // place to hold status for open connections
@@ -110,12 +124,23 @@ function notificationCallback(id) {
   }
 }
 
-function sendMessage(request, response, payload, options) {
+function sendMessage(request, response) {
+  var payload = request.body.notification;
+
+  var timeout = config.connectionTimeout || 1000;
+
   // set up the connection options
-  options.enhanced = true;
-  options.errorCallback = errorCallback;
-  options.cacheLength = 256;
-  options.debug = true;
+  var options = {
+    certData:          request.body.cert,
+    keyData:           request.body.key,
+    deviceId:          request.body.deviceId,
+    mode:              request.body.mode,
+    connectionTimeout: timeout,
+    enhanced:          true,
+    errorCallback:     errorCallback,
+    cacheLength:       256,
+    debug:             true
+  };
 
   if (request.body.mode === 'production') {
     options.gateway = 'gateway.push.apple.com';
@@ -164,4 +189,61 @@ function sendMessage(request, response, payload, options) {
   connection.sendNotification(notification);
 }
 
-exports.sendMessage = sendMessage;
+function handleExistingAuth (request, response) {
+  var appId = request.body.appId,
+      mode  = request.body.mode;
+
+  // check redis for an existing certificate for this appId
+  if (redisClient && redisClient.connected) {
+    redisClient.multi([ [ "mget", appId + "_" + mode + "_cert", appId + "_" + mode + "_key" ]]).exec(function (err, replies) {
+      if (replies === undefined || replies.length !== 1 || replies[0].length !== 2 || replies[0][0] === null || replies[0][1] === null) {
+        log.debug("No cert found in Redis for "+appId+" ("+mode+")");
+        response.end(JSON.stringify({ "response": "error", "error": "missing certificate" }));
+      } else {
+        log.debug("Found a cert in Redis for "+appId+" ("+mode+")");
+        request.body.cert = replies[0][0];
+        request.body.key = replies[0][1];
+
+        sendMessage(request, response);
+      }
+    });
+  } else {
+    log.info("No redis connection, can't check for existing certificate");
+    response.end(JSON.stringify({ "status": "error", "error": "Internal server error" }));
+  }
+}
+
+function handleNewAuth (request, response) {
+  var appId = request.body.appId,
+      mode  = request.body.mode,
+      cert  = request.body.cert,
+      key   = request.body.key;
+
+  if (redisClient && redisClient.connected) {
+    redisClient.multi([ [ "mset", appId + "_" + mode + "_cert", cert, appId + "_" + mode + "_key", key ]]).exec(function (err, replies) {
+      log.debug("Saved cert in Redis");
+      sendMessage(request, response);
+    });
+  } else {
+    log.info("No Redis connection, can't store cert");
+    sendMessage(request, response);
+  }
+}
+
+
+
+function handleMessage (request, response) {
+  log.debug("Push to "+request.body.deviceId);
+
+  if (request.body.cert !== undefined && request.body.key !== undefined) {
+    // If a certificate is provided, store it in redis
+    log.debug("New cert provided in request");
+    handleNewAuth(request, response);
+  } else {
+    log.debug("No cert provided, attempt to look up cert in the cache");
+    handleExistingAuth(request, response);
+  }
+}
+
+
+exports.handleMessage = handleMessage;
