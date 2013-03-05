@@ -15,8 +15,6 @@ redisClient.on("error", function (err) {
   log.error("Redis Error: " + err);
 });
 
-
-
 // place to hold status for open connections
 var status = { };
 
@@ -124,6 +122,7 @@ function notificationCallback(id) {
   }
 }
 
+// actually attempt to send a message, finally
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
@@ -189,6 +188,7 @@ function sendMessage(request, response) {
   connection.sendNotification(notification);
 }
 
+// if there is no certificate, see if one can be found
 function handleExistingAuth (request, response) {
   var appId = request.body.appId,
       mode  = request.body.mode;
@@ -213,6 +213,7 @@ function handleExistingAuth (request, response) {
   }
 }
 
+// certificate passed in, yay!
 function handleNewAuth (request, response) {
   var appId = request.body.appId,
       mode  = request.body.mode,
@@ -231,7 +232,7 @@ function handleNewAuth (request, response) {
 }
 
 
-
+// entry for the module, handle the message
 function handleMessage (request, response) {
   log.debug("Push to "+request.body.deviceId);
 
@@ -244,6 +245,5 @@ function handleMessage (request, response) {
     handleExistingAuth(request, response);
   }
 }
-
 
 exports.handleMessage = handleMessage;
