@@ -4,10 +4,11 @@
   "description": "Push Notification Service",
   "main": "index.js",
   "dependencies": {
-    "apn": "1.2.5",
+    "apn": "~1.2.5",
     "node-uuid": "~1.4.0",
     "redis": "~0.8.2",
-    "winston": "~0.6.2"
+    "winston": "~0.6.2",
+    "dpush": "~0.2.0"
   },
   "devDependencies": {},
   "scripts": {
