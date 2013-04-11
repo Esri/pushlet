@@ -17,34 +17,38 @@ redisClient.on("error", function (err) {
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
-  gcm.send(request.body.key, request.body.deviceId, payload, function (err, res) {
-    if (err) {
-      var error;
+  try {
+    gcm.send(request.body.key, request.body.deviceId, payload, function (err, res) {
+      if (err) {
+        var error;
 
-      if (err.toString().match("400")) {
-        error = 'Invalid Payload';
-      } else if (err.toString().match("401")) {
-        error = 'Bad Key';
-      } else {
-        error = 'Unknown Error';
-      }
-
-      response.end(JSON.stringify({ "status": "error", "error": error }));
-    } else {
-      // we should only be sending a single id
-      if (res.failure) {
-        if (res.invalidIds && res.invalidIds.length) {
-          response.end(JSON.stringify({ "status": "error", "error": "Invalid Device ID", invalidIds: res.invalidIds }));
-        } else if (res.updatedIds && res.updatedIds.length) {
-          response.end(JSON.stringify({ "status": "error", "error": "Updated Device ID", updatedIds: res.updatedIds }));
+        if (err.toString().match("400")) {
+          error = 'Invalid Payload';
+        } else if (err.toString().match("401")) {
+          error = 'Bad Key';
         } else {
-          response.end(JSON.stringify({ "status": "error", "error": "Unknown Error" }));
+          error = 'Unknown Error';
         }
+
+        response.end(JSON.stringify({ "status": "error", "error": error }));
       } else {
-        response.end(JSON.stringify({ "status": "ok" }));
+        // we should only be sending a single id
+        if (res.failure) {
+          if (res.invalidIds && res.invalidIds.length) {
+            response.end(JSON.stringify({ "status": "error", "error": "Invalid Device ID", invalidIds: res.invalidIds }));
+          } else if (res.updatedIds && res.updatedIds.length) {
+            response.end(JSON.stringify({ "status": "error", "error": "Updated Device ID", updatedIds: res.updatedIds }));
+          } else {
+            response.end(JSON.stringify({ "status": "error", "error": "Unknown Error" }));
+          }
+        } else {
+          response.end(JSON.stringify({ "status": "ok" }));
+        }
       }
-    }
-  });
+    });
+  } catch (majorError) {
+    response.end(JSON.stringify({ "status": "error", "error": majorError.toString() }));
+  }
 }
 
 
