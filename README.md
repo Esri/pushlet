@@ -8,22 +8,22 @@ APN Notification Service.
 
 `POST /message/apn`
 
-* appId - required
-* deviceId - required
-* mode - required (sandbox or production)
-* cert - optional
-* key - optional
+* appId - required - A unique identifier for this application. Most likely maps to the primary key or unique ID of the application in the client.
+* deviceId - required - The APNS token for the device
+* mode - required - sandbox or production, corresponding to which Apple server to connect to
+* cert - optional - If no cert is provided, will use an existing cert for the given appId. If no existing cert is loaded, will return an error.
+* key - optional - The private key for the given cert.
 * notification - required
-   * payload - required
-   * payload.badge - optional
-   * payload.sound - optional
-   * payload.alert - optional
-* timeout - optional (default 1000 ms)
+   * payload - optional - The raw payload to send to the device. See the APNS docs for more info.
+   * payload.alert - optional - Text to display in the push notification.
+   * payload.badge - optional - The badge number to display on the app icon.
+   * payload.sound - optional - Sound file to play for the push notification.
+* timeout - optional (default 1000 ms) - Since Apple does not send an acknowledgement packet on successful delivery of a notification, wait this long for an error message, and if no error is received, assumes it was successful. Set to lower values or 0 if you do not care about confirming whether the message was sent successfully.
 
 ```
 {
-  appId: "123456",
-  deviceId: "abcd",
+  appId: "com.example.iphone",
+  deviceId: "809f1d3237cd219c1c672bb141f6e18513fd86a073479ef295fd0e1687270853",
   mode: "production",
   notification: {
     alert: "The quick brown fox jumps over the lazy dog"
@@ -31,20 +31,22 @@ APN Notification Service.
 }
 ```
 
+[Apple push notification payload documentation](http://developer.apple.com/library/ios/#documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/ApplePushService/ApplePushService.html)
+
 ### Google Push Notification
 
 `POST /message/gcm`
 
-* appId - required
-* deviceId - required
-* mode - required (sandbox or production)
-* notification - required
-* key - optional
+* appId - required - A unique identifier for this application. Most likely maps to the primary key or unique ID of the application in the client.
+* deviceId - required - The GCM token for the device
+* mode - required - sandbox or production. This has no meaning in GCM, but the API Key is stored scoped to this value anyway.
+* notification - required - A JSON payload to deliver to the device. GCM itself does not define any known properties, must be handled by the developer.
+* key - optional - The GCM API Key
 
 ```
 {
-  appId: "123456",
-  deviceId: 'abcd',
+  appId: "com.example.android",
+  deviceId: "APA91bF-SNSVvcW-4M1hjuzOm49bn15V3Um9TrOwrdH2Otvf-Vv6M4SpZ2Z2g7FXgNvcoscJQkpt84Vjetbq7uRyzCxFil8qVTzjxGzAEV7fAqzqwULXEl96SH1_OjfKp_qK7p0XJWKrwfV3Sad6ZW1vLZEi6Mirpg",
   mode: "production",
   key:  "my key",
   notification: {
@@ -52,3 +54,5 @@ APN Notification Service.
   }
 }
 ```
+
+[GCM Getting Started](http://developer.android.com/google/gcm/gs.html)
