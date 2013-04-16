@@ -1,6 +1,18 @@
 # Dozer
 
-APN Notification Service.
+Push Notification Service.
+
+## Installing
+
+1. Install Node.js (0.10.x, not 0.11.x)
+2. Install Redis
+3. Clone Source
+4. Run `npm install`
+5. Run Dozer
+
+    $ node index.js
+
+Configuration lives in `config.json`, it is advised that you run as a non-privileged user.
 
 ## API Endpoints
 
