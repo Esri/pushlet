@@ -8,7 +8,7 @@
     "node-uuid": "~1.4.0",
     "redis": "~0.8.2",
     "winston": "~0.6.2",
-    "dpush": "git@github.com:geoloqi/dpush.git"
+    "dpush": "git://github.com/geoloqi/dpush.git"
   },
   "devDependencies": {},
   "scripts": {
