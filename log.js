@@ -1,4 +1,5 @@
-var winston = require('winston');
+var winston  = require('winston'),
+    airbrake = require('winston-airbrake').Airbrake;
 
 var config = require('./config.json');
 
@@ -16,4 +17,5 @@ var logger = new (winston.Logger)({
   transports: transports
 });
 
+logger.add(airbrake, config.logging.airbrake);
 exports.logger = logger;
