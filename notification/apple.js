@@ -89,7 +89,11 @@ function errorCallback(err, options) {
     }
 
     // known error state, handle it normally
-    response.end(JSON.stringify({ response: "error", error: errorMap[err] }));
+    var errResponse = errorMap[err];
+    if (errMap === undefined) {
+      errResponse = err.toString();
+    }
+    response.end(JSON.stringify({ response: "error", error: errorResponse }));
   } else {
     // whoa, something weird happened, log it and return a result
     log.warn("errorCallback returned with unknown error: " + err);

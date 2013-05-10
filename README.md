@@ -27,9 +27,9 @@ Configuration lives in `config.json`, it is advised that you run as a non-privil
 * key - optional - The private key for the given cert.
 * notification - required
    * payload - optional - The raw payload to send to the device. See the APNS docs for more info.
-   * payload.alert - optional - Text to display in the push notification.
-   * payload.badge - optional - The badge number to display on the app icon.
-   * payload.sound - optional - Sound file to play for the push notification.
+   * alert - optional - Text to display in the push notification.
+   * badge - optional - The badge number to display on the app icon.
+   * sound - optional - Sound file to play for the push notification.
 * timeout - optional (default 1000 ms) - Since Apple does not send an acknowledgement packet on successful delivery of a notification, wait this long for an error message, and if no error is received, assumes it was successful. Set to lower values or 0 if you do not care about confirming whether the message was sent successfully.
 
 ```

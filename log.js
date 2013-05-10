@@ -17,5 +17,5 @@ var logger = new (winston.Logger)({
   transports: transports
 });
 
-logger.add(airbrake, config.logging.airbrake);
+//logger.add(airbrake, config.logging.airbrake);
 exports.logger = logger;
