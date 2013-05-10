@@ -216,7 +216,7 @@ function sendMessage(request, response) {
   }, request.body.timeout);
 
   // send the notification
-  connection.sendNotification(notification);
+  connection.pushNotification(notification, notification.device);
 }
 
 // if there is no certificate, see if one can be found
