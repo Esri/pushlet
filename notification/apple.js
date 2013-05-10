@@ -62,6 +62,33 @@ function getConnection (name, options) {
       }
     });
 
+    connection.on('notificationError', function () {
+      log.warn("Connection error for "+this.options.name);
+      // remove the connection from the connection pool
+      if (this.options && this.options.name) {
+        connections[this.options.name] = undefined;
+      }
+    });
+
+    connection.on('transmissionError', function () {
+      log.warn("Transmission error for "+this.options.name);
+      // remove the connection from the connection pool
+      if (this.options && this.options.name) {
+        connections[this.options.name] = undefined;
+      }
+    });
+
+    connection.on('socketError', function () {
+      console.dir(arguments);
+      log.warn("Socket error for "+this.options.name);
+      // remove the connection from the connection pool
+      if (this.options && this.options.name) {
+        connections[this.options.name] = undefined;
+      }
+    });
+
+
+
     connections[name] = connection;
   } else {
     log.debug("Found existing connection for "+name);
