@@ -35,7 +35,7 @@ var errorMap = {
 
 
 // get a connection from the pool if possible, otherwise create a new connection
-function getConnection (name, options) {
+function getConnection (name, options, uuid) {
   var connection = connections[name];
 
   // if there is no connection, create a new one
@@ -51,6 +51,7 @@ function getConnection (name, options) {
       // remove the connection from the connection pool
       if (this.options && this.options.name) {
         connections[this.options.name] = undefined;
+        errorCallback("disconnected", {uuid: uuid, errorDescription: "APNS disconnected the socket! Most likely this is due to a bad or expired certificate, or trying to use a sandbox certificate on the production APNS servers."});
       }
     });
 
@@ -59,6 +60,7 @@ function getConnection (name, options) {
       // remove the connection from the connection pool
       if (this.options && this.options.name) {
         connections[this.options.name] = undefined;
+        errorCallback("error", {uuid: uuid, errorDescription: "Unknown connection error"});
       }
     });
 
@@ -70,11 +72,20 @@ function getConnection (name, options) {
       }
     });
 
+    // This error is returned when Apple closes the connection in the middle of sending a push notification
+    // Most often it's due to a malformed payload sent to Apple, or because of an invalid device ID
     connection.on('transmissionError', function () {
       log.warn("Transmission error for "+this.options.name);
       // remove the connection from the connection pool
       if (this.options && this.options.name) {
         connections[this.options.name] = undefined;
+
+        var errorDescription = "An unknown error occurred while trying to send the push notification. Most often this is caused by a malformed payload or invalid device ID.";
+        if (arguments[0] && errorMap[arguments[0]] !== undefined) {
+          errorDescription = errorMap[arguments[0]];
+        }
+
+        errorCallback("transmissionError", {uuid: uuid, errorDescription: errorDescription});
       }
     });
 
@@ -84,6 +95,7 @@ function getConnection (name, options) {
       // remove the connection from the connection pool
       if (this.options && this.options.name) {
         connections[this.options.name] = undefined;
+        errorCallback("socketError", {uuid: uuid});
       }
     });
 
@@ -100,10 +112,14 @@ function getConnection (name, options) {
 
 // callback from sendMesage error callback, known error state
 function errorCallback(err, options) {
+  if (options === undefined) {
+    log.warn("errorCallback called but no options passed", err);
+    return;
+  }
   var connection = status[options.uuid];
 
   if (connection === undefined) {
-    log.warn("errorCallback called but no connection information: " + options.uuid);
+    log.info("errorCallback called but no connection was active. uuid: " + options.uuid);
     return;
   }
 
@@ -117,10 +133,10 @@ function errorCallback(err, options) {
 
     // known error state, handle it normally
     var errResponse = errorMap[err];
-    if (errMap === undefined) {
+    if (errorMap[err] === undefined) {
       errResponse = err.toString();
     }
-    response.end(JSON.stringify({ response: "error", error: errorResponse }));
+    response.end(JSON.stringify({ response: "error", error: errResponse, error_description: options.errorDescription }));
   } else {
     // whoa, something weird happened, log it and return a result
     log.warn("errorCallback returned with unknown error: " + err);
@@ -208,7 +224,7 @@ function sendMessage(request, response) {
 
   notification.device = new apns.Device(request.body.deviceId);
 
-  var connection = getConnection(request.body.appId + "_" + request.body.mode, options);
+  var connection = getConnection(request.body.appId + "_" + request.body.mode, options, notification.uuid);
 
   // set a timeout to check to see if an error occurred
   setTimeout(function () {
