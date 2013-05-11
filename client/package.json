@@ -1,0 +1,13 @@
+{
+  "name": "dozer-test",
+  "version": "0.0.1",
+  "description": "Test Push Notifications",
+  "main": "push.js",
+  "dependencies": {
+    "optimist": "*",
+    "request": "*"
+  },
+  "repository": "",
+  "author": "Aaron Parecki",
+  "license": ""
+}
