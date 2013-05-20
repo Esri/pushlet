@@ -8,14 +8,16 @@
     "node-uuid": "~1.4.0",
     "redis": "~0.8.2",
     "winston": "~0.6.2",
-    "dpush": "git://github.com/geoloqi/dpush.git",
-    "winston-airbrake": "git://github.com/JerrySievert/winston-airbrake.git"
+    "dpush": "git://github.com/geoloqi/dpush.git"
   },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "",
-  "author": "",
-  "license": ""
+  "author": "Jerry Sievert <jsievert@esri.com>",
+  "contributors": [
+    "Aaron Parecki <aparecki@esri.com>"
+  ],
+  "license": "Apache"
 }

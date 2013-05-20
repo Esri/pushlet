@@ -68,3 +68,6 @@ Configuration lives in `config.json`, it is advised that you run as a non-privil
 ```
 
 [GCM Getting Started](http://developer.android.com/google/gcm/gs.html)
+
+[](Esri Tags: Dozer APN GCM Push-Notification Notification Push)
+[](Esri Language: JavaScript)

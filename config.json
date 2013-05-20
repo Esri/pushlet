@@ -6,11 +6,7 @@
         "console": true,
         "airbrake": true
       }
-    ],
-    "airbrake": {
-      "apiKey": "e17cf36c55570534eb5321cf205167ea",
-      "host": "exceptions.geoloqi.com"
-    }
+    ]
   },
   "redis": {
     "port": 6379,
