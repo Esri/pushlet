@@ -1,6 +1,6 @@
-# Dozer
+# Pushlet
 
-Push Notification Service.
+A simple HTTP wrapper around the Apple Push Notification Service and Google Cloud Messaging Service
 
 ## Installing
 
@@ -8,9 +8,9 @@ Push Notification Service.
 2. Install Redis
 3. Clone Source
 4. Run `npm install`
-5. Run Dozer
+5. Run Pushlet
 
-    $ node index.js
+    $ node pushlet.js
 
 Configuration lives in `config.json`, it is advised that you run as a non-privileged user.
 
@@ -69,5 +69,5 @@ Configuration lives in `config.json`, it is advised that you run as a non-privil
 
 [GCM Getting Started](http://developer.android.com/google/gcm/gs.html)
 
-[](Esri Tags: Dozer APN GCM Push-Notification Notification Push)
+[](Esri Tags: Pushlet APN APNS GCM Apple Google Android Push-Notification Notification Push)
 [](Esri Language: JavaScript)

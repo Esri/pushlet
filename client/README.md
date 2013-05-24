@@ -1,9 +1,9 @@
-## Run Dozer
+## Run Pushlet
 
-In one terminal window, run dozer:
+In one terminal window, run Pushlet:
 
 ```
-node index.js
+node pushlet.js
 ```
 
 
@@ -74,12 +74,12 @@ If there is a problem, the output will end in
 closed
 ```
 
-and the program will end. If you do this step, you can often find problems with the certificate much easier than after you try to send a push notification through dozer directly.
+and the program will end. If you do this step, you can often find problems with the certificate much easier than after you try to send a push notification through Pushlet directly.
 
 
 ## Send a test push
 
-After you have the dozer server running, run this command to send a push notification through it.
+After you have the Pushlet server running, run this command to send a push notification through it.
 
 ```
 node push.js --cert=cert.pem --key=key.pem --mode=sandbox --message="Testing pushies" --timeout=5000
@@ -138,8 +138,8 @@ You may get other errors reported back, they will hopefully have a descriptive e
 
 ### Getting an "ok" response but not receiving a push
 
-The APNS protocol does not actually acknowledge successful push notifications, it only reports when an error has occurred. To compensate for this, dozer has a timeout mechanism where it will wait for an error for a certain number of milliseconds before assuming it was successful and returning the "ok" response to the client. 
+The APNS protocol does not actually acknowledge successful push notifications, it only reports when an error has occurred. To compensate for this, Pushlet has a timeout mechanism where it will wait for an error for a certain number of milliseconds before assuming it was successful and returning the "ok" response to the client. 
 
-If you are getting the `{"response": "ok"}` response but not receiving a push notification, try increasing the timeout to give dozer longer to catch an error returned from Apple.
+If you are getting the `{"response": "ok"}` response but not receiving a push notification, try increasing the timeout to give Pushlet longer to catch an error returned from Apple.
 
 

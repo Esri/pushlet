@@ -12,7 +12,7 @@ var argv = require('optimist').argv;
  * mode - default sandbox - "sandbox" or "production"
  * timeout - default 2000 - the timeout to wait for an error to be returned
  * message - The alert text to display in the push notification
- * dozerBaseURL - default http://localhost:8080/ - The full path to the Dozer HTTP endpoint
+ * pushletBaseURL - default http://localhost:8080/ - The full path to the Pushlet HTTP endpoint
  */
 
 if(!argv.token) {
@@ -48,9 +48,9 @@ var message = "Testing push notifications!";
 if(argv.message)
   message = argv.message;
 
-var dozerBaseURL = "http://localhost:8080/";
-if(argv.dozer)
-  dozerBaseURL = argv.dozer;
+var pushletBaseURL = "http://localhost:8080/";
+if(argv.pushlet)
+  pushletBaseURL = argv.pushlet;
 
 var payload = JSON.stringify({
   appId: 'test-app',
@@ -65,7 +65,7 @@ var payload = JSON.stringify({
 });
 console.log(payload);
 
-request(dozerBaseURL+'message/apn', {
+request(pushletBaseURL+'message/apn', {
   method: 'POST',
   body: payload,
   headers: ['Content-Type: application/json']
