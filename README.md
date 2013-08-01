@@ -43,7 +43,7 @@ Configuration lives in `config.json`, it is advised that you run as a non-privil
 }
 ```
 
-[Apple push notification payload documentation](http://developer.apple.com/library/ios/#documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/ApplePushService/ApplePushService.html)
+[Apple push notification payload documentation](http://developer.apple.com/library/ios/#documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Introduction.html)
 
 ### Google Push Notification
 
