@@ -197,23 +197,28 @@ function sendMessage(request, response) {
   // set up the notification based on data passed
   var notification = new apns.Notification();
 
-  if (payload.payload !== undefined) {
-    notification.payload = payload;
-  }
-
   if (payload.badge !== undefined) {
     notification.badge = payload.badge;
+    payload.badge = null;
   }
 
   if (payload.sound !== undefined) {
     notification.sound = payload.sound;
+    payload.sound = null;
   }
 
   if (payload.alert !== undefined) {
     notification.alert = payload.alert;
+    payload.alert = null;
+  }
+
+  if (payload.payload !== undefined) {
+    notification.payload = payload;
   }
 
   notification.uuid = uuid.v4();
+
+  log.debug(JSON.stringify(notification));
 
   // stash the connection away
   status[notification.uuid] = {
