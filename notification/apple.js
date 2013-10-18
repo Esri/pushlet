@@ -199,20 +199,21 @@ function sendMessage(request, response) {
 
   if (payload.badge !== undefined) {
     notification.badge = payload.badge;
-    payload.badge = null;
+    delete payload.badge;
   }
 
   if (payload.sound !== undefined) {
     notification.sound = payload.sound;
-    payload.sound = null;
+    delete payload.sound;
   }
 
   if (payload.alert !== undefined) {
     notification.alert = payload.alert;
-    payload.alert = null;
+    delete payload.alert;
   }
 
-  if (payload.payload !== undefined) {
+  if (payload.payload !== undefined && 
+      Object.keys(payload.payload).length != 0) {
     notification.payload = payload;
   }
 
