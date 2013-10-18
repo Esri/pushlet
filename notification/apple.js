@@ -213,7 +213,7 @@ function sendMessage(request, response) {
   }
 
   if (payload.payload !== undefined && 
-      Object.keys(payload.payload).length != 0) {
+      Object.keys(payload.payload).length !== 0) {
     notification.payload = payload;
   }
 
