@@ -9,7 +9,7 @@ var config = require('./config.json');
 
 
 
-function handlePostData (request, response, callback) {
+function handlePostData (request, response, handler) {
   var body = '';
 
   request.on('data', function (data) {
@@ -24,12 +24,11 @@ function handlePostData (request, response, callback) {
       return;
     }
 
-    callback(request, response);
+    handleRequest(request, response, handler);
   });
 }
 
-
-function handleAPNMessage (request, response) {
+function handleRequest(request, response, handler) {
   if (request.body === undefined) {
     response.end(JSON.stringify({ "response": "error", "error": "no data" }));
   } else {
@@ -47,30 +46,7 @@ function handleAPNMessage (request, response) {
         request.body.timeout = config.timeout;
       }
 
-      apns.handleMessage(request, response);
-    }
-  }
-}
-
-function handleGCMMessage (request, response) {
-  if (request.body === undefined) {
-    response.end(JSON.stringify({ "response": "error", "error": "no data" }));
-  } else {
-    if (request.body.appId === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "appId required" }));
-    } else if (request.body.deviceId === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "deviceId required" }));
-    } else if (request.body.mode === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "mode required" }));
-    } else if (request.body.notification === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "notification required" }));
-    } else {
-      // if we do not have a timeout, set the default
-      if (request.body.timeout === undefined) {
-        request.body.timeout = config.timeout;
-      }
-
-      gcm.handleMessage(request, response);
+      handler.handleMessage(request, response);
     }
   }
 }
@@ -87,10 +63,10 @@ var server = http.createServer(function (request, response) {
 
   switch (request.url) {
   case '/message/apn':
-    handlePostData(request, response, handleAPNMessage);
+    handlePostData(request, response, apns);
     break;
   case '/message/gcm':
-    handlePostData(request, response, handleGCMMessage);
+    handlePostData(request, response, gcm);
     break;
   default:
     handleNotFound(response);
