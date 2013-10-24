@@ -1,8 +1,9 @@
-var http  = require('http'),
-    apns  = require('./notification/apple'),
-    gcm   = require('./notification/google'),
-    qs    = require('querystring'),
-    log   = require('./log').logger;
+var http      = require('http'),
+    apns      = require('./notification/apple'),
+    gcm       = require('./notification/google'),
+    qs        = require('querystring'),
+    responder = require('./responder'),
+    log       = require('./log').logger;
 
 var config = require('./config.json');
 
@@ -17,7 +18,7 @@ function handlePostData (request, response, handler) {
     try {
       request.body = JSON.parse(body);
     } catch (err) {
-      response.end(JSON.stringify({ "status": "error", "error": "Bad JSON input" }));
+      response.end(responder.err({error: "Bad JSON Input"}));
       return;
     }
 
@@ -27,19 +28,19 @@ function handlePostData (request, response, handler) {
 
 function handleRequest(request, response, handler) {
   if (request.body === undefined) {
-    response.end(JSON.stringify({ "response": "error", "error": "no data" }));
+    response.end(responder.err({error: "No Data"}));
   } else {
     if (request.body.appId === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "appId required" }));
+      response.end(responder.err({error: "Missing Required Field appId"}));
 
     } else if (request.body.deviceId === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "deviceId required" }));
+        response.end(responder.err({error: "Missing Required Field deviceId"}));
 
     } else if (request.body.mode === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "mode required" }));
+      response.end(responder.err({error: "Missing Required Field mode"}));
 
     } else if (request.body.notification === undefined) {
-      response.end(JSON.stringify({ "response": "error", "error": "notification required" }));
+      response.end(responder.err({error: "Missing Required Field notification"}));
 
     } else {
       // if we do not have a timeout, set the default
