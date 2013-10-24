@@ -75,6 +75,10 @@ function handleGCMMessage (request, response) {
   }
 }
 
+function handleNotFound(response) {
+  response.writeHead(404);
+  response.end("not found");
+}
 
 var server = http.createServer(function (request, response) {
 	if (request.url === '/message/apn' && request.method === 'POST') {
@@ -82,8 +86,7 @@ var server = http.createServer(function (request, response) {
   } else if (request.url === '/message/gcm' && request.method === 'POST') {
     handlePostData(request, response, handleGCMMessage);
   } else {
-    response.writeHead(404);
-    response.end("not found");
+    handleNotFound(response);
   }
 });
 
