@@ -81,9 +81,13 @@ function handleNotFound(response) {
 }
 
 var server = http.createServer(function (request, response) {
-	if (request.url === '/message/apn' && request.method === 'POST') {
+  if (request.method !== 'POST') {
+    handleNotFound(response);
+  }
+
+  if (request.url === '/message/apn') {
     handlePostData(request, response, handleAPNMessage);
-  } else if (request.url === '/message/gcm' && request.method === 'POST') {
+  } else if (request.url === '/message/gcm') {
     handlePostData(request, response, handleGCMMessage);
   } else {
     handleNotFound(response);
