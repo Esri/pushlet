@@ -4,10 +4,7 @@ var http  = require('http'),
     qs    = require('querystring'),
     log   = require('./log').logger;
 
-
 var config = require('./config.json');
-
-
 
 function handlePostData (request, response, handler) {
   var body = '';
@@ -34,12 +31,16 @@ function handleRequest(request, response, handler) {
   } else {
     if (request.body.appId === undefined) {
       response.end(JSON.stringify({ "response": "error", "error": "appId required" }));
+
     } else if (request.body.deviceId === undefined) {
       response.end(JSON.stringify({ "response": "error", "error": "deviceId required" }));
+
     } else if (request.body.mode === undefined) {
       response.end(JSON.stringify({ "response": "error", "error": "mode required" }));
+
     } else if (request.body.notification === undefined) {
       response.end(JSON.stringify({ "response": "error", "error": "notification required" }));
+
     } else {
       // if we do not have a timeout, set the default
       if (request.body.timeout === undefined) {
@@ -75,4 +76,3 @@ var server = http.createServer(function (request, response) {
 
 server.listen(config.port ? config.port : 8080);
 log.info("Listening on port "+config.port);
-
