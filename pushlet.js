@@ -29,28 +29,30 @@ function handlePostData (request, response, handler) {
 function handleRequest(request, response, handler) {
   if (request.body === undefined) {
     response.end(responder.err({ error: "No Data" }));
-  } else {
-    if (request.body.appId === undefined) {
-      response.end(responder.err({ error: "Missing Required Field appId" }));
-
-    } else if (request.body.deviceId === undefined) {
-        response.end(responder.err({ error: "Missing Required Field deviceId" }));
-
-    } else if (request.body.mode === undefined) {
-      response.end(responder.err({ error: "Missing Required Field mode" }));
-
-    } else if (request.body.notification === undefined) {
-      response.end(responder.err({ error: "Missing Required Field notification" }));
-
-    } else {
-      // if we do not have a timeout, set the default
-      if (request.body.timeout === undefined) {
-        request.body.timeout = config.timeout;
-      }
-
-      handler.handleMessage(request, response);
-    }
   }
+
+  if (request.body.appId === undefined) {
+    response.end(responder.err({ error: "Missing Required Field appId" }));
+  }
+
+  if (request.body.deviceId === undefined) {
+    response.end(responder.err({ error: "Missing Required Field deviceId" }));
+  } 
+
+  if (request.body.mode === undefined) {
+    response.end(responder.err({ error: "Missing Required Field mode" }));
+  }
+
+  if (request.body.notification === undefined) {
+    response.end(responder.err({ error: "Missing Required Field notification" }));
+  }
+
+  // if we do not have a timeout, set the default
+  if (request.body.timeout === undefined) {
+    request.body.timeout = config.timeout;
+  }
+
+  handler.handleMessage(request, response);
 }
 
 function handleNotFound(response) {
