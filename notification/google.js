@@ -1,5 +1,6 @@
 var gcm = require('dpush'),
     redis = require('redis'),
+    responder = require('../responder'),
     log  = require('../log').logger;
 
 var config = require('../config.json');
@@ -29,25 +30,24 @@ function sendMessage(request, response) {
         } else {
           error = 'Unknown Error';
         }
-
-        response.end(JSON.stringify({ "status": "error", "error": error }));
+        response.end(responder.err({ error: error }));
       } else {
         // we should only be sending a single id
         if (res.failure) {
           if (res.invalidIds && res.invalidIds.length) {
-            response.end(JSON.stringify({ "status": "error", "error": "Invalid Device ID", invalidIds: res.invalidIds }));
+            response.end(responder.err({ error: "Invalid Device ID", invalidIds: res.invalidIds }));
           } else if (res.updatedIds && res.updatedIds.length) {
-            response.end(JSON.stringify({ "status": "error", "error": "Updated Device ID", updatedIds: res.updatedIds }));
+            response.end(responder.err({ error: "Updated Device ID", updatedIds: res.updatedIds }));
           } else {
-            response.end(JSON.stringify({ "status": "error", "error": "Unknown Error" }));
+            response.end(responder.err({ error: "Unknown Error" }));
           }
         } else {
-          response.end(JSON.stringify({ "status": "ok" }));
+          response.end(responder.ok());
         }
       }
     });
   } catch (majorError) {
-    response.end(JSON.stringify({ "status": "error", "error": majorError.toString() }));
+    response.end(responder.err({ error: majorError.toString() }));
   }
 }
 
@@ -62,7 +62,7 @@ function handleExistingAuth (request, response) {
     redisClient.get(appId + "_" + mode + "_gcmkey", function (err, reply) {
       if (reply === null) {
         log.debug("No GCM key found in Redis for "+appId+" ("+mode+")");
-        response.end(JSON.stringify({ "response": "error", "error": "missing key" }));
+        response.end(responder.err({ error: "Missing Key" }));
       } else {
         log.debug("Found a GCM key in Redis for "+appId+" ("+mode+")");
         request.body.key = reply;
@@ -72,7 +72,7 @@ function handleExistingAuth (request, response) {
     });
   } else {
     log.info("No redis connection, can't check for existing certificate");
-    response.end(JSON.stringify({ "status": "error", "error": "Internal server error" }));
+    response.end(responder.err({ error: "Internal Server Error" }));
   }
 }
 
