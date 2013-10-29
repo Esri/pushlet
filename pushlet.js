@@ -52,10 +52,10 @@ function handleRequest(request, response, handler) {
   if (handler.authProvided(request)) {
     // If a certificate is provided, store it in redis
     log.debug("New auth provided in request");
-    auth.handleNewAuth(request, response, handler.setAuthData, handler.sendMessage);
+    auth.handleNewAuth(request, response, handler);
   } else {
     log.debug("No auth provided, attempt to look up in the cache");
-    auth.handleExistingAuth(request, response, handler.getAuthData, handler.authCallback);
+    auth.handleExistingAuth(request, response, handler);
   }
 }
 

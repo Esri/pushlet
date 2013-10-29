@@ -13,32 +13,32 @@ redisClient.on("error", function (err) {
 });
 
 // auth passed in, yay!
-function handleNewAuth (request, response, setAuthData, sendMessage) {
+function handleNewAuth (request, response, handler) {
   var appId = request.body.appId,
       mode  = request.body.mode,
       cert  = request.body.cert,
       key   = request.body.key;
 
   if (redisClient && redisClient.connected) {
-    redisClient.multi(setAuthData(appId, mode, key, cert)).exec(function (err, replies) {
+    redisClient.multi(handler.setAuthData(appId, mode, key, cert)).exec(function (err, replies) {
       log.debug("Saved auth in Redis");
-      sendMessage(request, response);
+      handler.sendMessage(request, response);
     });
   } else {
     log.info("No Redis connection, can't store auth credentials");
-    sendMessage(request, response);
+    handler.sendMessage(request, response);
   }
 }
 
-// if there is no certificate, see if one can be found
-function handleExistingAuth (request, response, getAuthData, callback) {
+// if there is no key or cert, see if one can be found
+function handleExistingAuth (request, response, handler) {
   var appId = request.body.appId,
       mode  = request.body.mode;
 
   // check redis for an existing auth for this appId
   if (redisClient && redisClient.connected) {
-    redisClient.multi(getAuthData(appId, mode)).exec(function(err, replies) {
-      callback(err, replies, request, response, appId, mode);
+    redisClient.multi(handler.getAuthData(appId, mode)).exec(function(err, replies) {
+      handler.authCallback(err, replies, request, response, appId, mode);
     });
   } else {
     log.info("No Redis connection, can't check for existing credentials");
