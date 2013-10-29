@@ -47,6 +47,7 @@ function handleRequest(request, response, handler) {
     request.body.timeout = config.timeout;
   }
 
+  log.debug("Push to " + request.body.deviceId);
   handler.handleMessage(request, response);
 }
 

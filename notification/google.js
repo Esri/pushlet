@@ -97,7 +97,6 @@ function handleNewAuth (request, response) {
 
 // entry for the module, handle the message
 function handleMessage (request, response) {
-  log.debug("Push to "+request.body.deviceId);
 
   if (request.body.key !== undefined) {
     // If a key is provided, store it in redis

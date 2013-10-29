@@ -287,7 +287,6 @@ function handleNewAuth (request, response) {
 
 // entry for the module, handle the message
 function handleMessage (request, response) {
-  log.debug("Push to "+request.body.deviceId);
 
   if (request.body.cert !== undefined && request.body.key !== undefined) {
     // If a certificate is provided, store it in redis
