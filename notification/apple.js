@@ -231,11 +231,6 @@ function sendMessage(request, response) {
   connection.pushNotification(notification, notification.device);
 }
 
-// if there is no certificate, see if one can be found
-function handleExistingAuth (request, response) {
-  auth.handleExistingAuth(request, response, getAuthData, authCallback);
-}
-
 function authCallback(err, replies, request, response, appId, mode) {
   if (replies === undefined || replies.length !== 2 || replies[0] === null || replies[1] === null) {
     log.debug("No cert found in Redis for "+appId+" ("+mode+")");
@@ -266,10 +261,6 @@ function authCertString(appId, mode) {
 function authKeyString(appId, mode) {
   return appId + "_" + mode + "_key";
 }
-// certificate passed in, yay!
-function handleNewAuth (request, response) {
-  auth.handleNewAuth(request, response, setAuthData, sendMessage);
-}
 
 function authProvided(request) {
   return (request.body.cert !== undefined && request.body.key !== undefined);
@@ -280,15 +271,16 @@ function handleMessage (request, response) {
 
   if (authProvided(request)) {
     // If a certificate is provided, store it in redis
-    log.debug("New cert provided in request");
-    handleNewAuth(request, response);
+    log.debug("New auth provided in request");
+    auth.handleNewAuth(request, response, setAuthData, sendMessage);
   } else {
-    log.debug("No cert provided, attempt to look up cert in the cache");
-    handleExistingAuth(request, response);
+    log.debug("No auth provided, attempt to look up in the cache");
+    auth.handleExistingAuth(request, response, getAuthData, authCallback);
   }
 }
 
 exports.handleMessage = handleMessage;
+exports.sendMessage   = sendMessage;
 exports.setAuthData   = setAuthData;
 exports.getAuthData   = getAuthData;
 exports.authCallback  = authCallback;

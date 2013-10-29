@@ -43,11 +43,6 @@ function sendMessage(request, response) {
   }
 }
 
-// if there is no key, see if one can be found
-function handleExistingAuth (request, response) {
-  auth.handleExistingAuth(request, response, getAuthData, authCallback);
-}
-
 function authCallback(err, replies, request, response, appId, mode) {
   if (replies === undefined || replies.length !== 1 || replies[0] === null) {
     log.debug("No GCM key found in Redis for "+appId+" ("+mode+")");
@@ -73,11 +68,6 @@ function authKeyString(appId, mode) {
   return appId + "_" + mode + "_gcmkey";
 }
 
-// key passed in, yay!
-function handleNewAuth (request, response) {
-  auth.handleNewAuth(request, response, setAuthData, sendMessage);
-}
-
 function authProvided(request) {
   return (request.body.key !== undefined);
 }
@@ -87,15 +77,16 @@ function handleMessage (request, response) {
 
   if (authProvided(request)) {
     // If a key is provided, store it in redis
-    log.debug("New key provided in request");
-    handleNewAuth(request, response);
+    log.debug("New auth provided in request");
+    auth.handleNewAuth(request, response, setAuthData, sendMessage);
   } else {
-    log.debug("No key provided, attempt to look up key in the cache");
-    handleExistingAuth(request, response);
+    log.debug("No auth provided, attempt to look up in the cache");
+    auth.handleExistingAuth(request, response, getAuthData, authCallback);
   }
 }
 
 exports.handleMessage = handleMessage;
+exports.sendMessage   = sendMessage;
 exports.setAuthData   = setAuthData;
 exports.getAuthData   = getAuthData;
 exports.authCallback  = authCallback;
