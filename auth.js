@@ -12,8 +12,42 @@ redisClient.on("error", function (err) {
   log.error("Redis Error: " + err);
 });
 
+function authKeyString(appId, mode, key) {
+  return appId + "_" + mode + key;
+}
+
+function authProvided(request, keys) {
+  for (var key in keys) {
+    if (request.body[key] === undefined)
+      return false;
+  }
+  return true;
+}
+
+function getAuthData(request, keys) {
+  var appId = request.body.appId,
+      mode  = request.body.mode;
+
+  var ret = [];
+  for (var key in keys) {
+    ret.push( [ "get", authKeyString(appId, mode, keys[key]) ] );
+  }
+  return ret;
+}
+
+function setAuthData(request, keys) {
+  var appId = request.body.appId,
+      mode  = request.body.mode;
+
+  var ret = [];
+  for (var key in keys) {
+    ret.push( [ "set", authKeyString(appId, mode, keys[key]), request.body[key] ] );
+  }
+  return ret;
+}
+
 function authenticateAndHandleRequest(request, response, handler) {
-  if (handler.authProvided(request)) {
+  if (authProvided(request, handler.authKeys)) {
     // If a certificate is provided, store it in redis
     log.debug("New auth provided in request");
     handleNewAuth(request, response, handler);
@@ -31,7 +65,7 @@ function handleNewAuth (request, response, handler) {
       key   = request.body.key;
 
   if (redisClient && redisClient.connected) {
-    redisClient.multi(handler.setAuthData(appId, mode, key, cert)).exec(function (err, replies) {
+    redisClient.multi(setAuthData(request, handler.authKeys)).exec(function (err, replies) {
       log.debug("Saved auth in Redis");
       handler.sendMessage(request, response);
     });
@@ -48,7 +82,7 @@ function handleExistingAuth (request, response, handler) {
 
   // check redis for an existing auth for this appId
   if (redisClient && redisClient.connected) {
-    redisClient.multi(handler.getAuthData(appId, mode)).exec(function(err, replies) {
+    redisClient.multi(getAuthData(request, handler.authKeys)).exec(function(err, replies) {
       handler.authCallback(err, replies, request, response, appId, mode);
     });
   } else {

@@ -243,30 +243,9 @@ function authCallback(err, replies, request, response, appId, mode) {
   }
 }
 
-function getAuthData(appId, mode) {
-  return [ [ "get", authCertString(appId, mode) ],
-           [ "get", authKeyString(appId, mode) ] ]
-}
-
-function setAuthData(appId, mode, key, cert) {
-  return [ [ "set", authCertString(appId, mode), cert ],
-           [ "set", authKeyString(appId, mode), key ] ]
-}
-
-function authCertString(appId, mode) {
-  return appId + "_" + mode + "_cert";
-}
-
-function authKeyString(appId, mode) {
-  return appId + "_" + mode + "_key";
-}
-
-function authProvided(request) {
-  return (request.body.cert !== undefined && request.body.key !== undefined);
-}
+// auth keys within the body => redis key
+var authKeys = {"cert": "_cert", "key": "_key"}
 
 exports.sendMessage   = sendMessage;
-exports.authProvided  = authProvided;
-exports.setAuthData   = setAuthData;
-exports.getAuthData   = getAuthData;
+exports.authKeys      = authKeys;
 exports.authCallback  = authCallback;

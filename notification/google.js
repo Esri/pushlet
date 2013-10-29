@@ -54,25 +54,9 @@ function authCallback(err, replies, request, response, appId, mode) {
   }
 }
 
-function getAuthData(appId, mode) {
-  return [ [ "get", authKeyString(appId, mode) ] ]
-}
-
-// we expect cert to be nil
-function setAuthData(appId, mode, key, cert) {
-  return [ [ "set", authKeyString(appId, mode), key] ]
-}
-
-function authKeyString(appId, mode) {
-  return appId + "_" + mode + "_gcmkey";
-}
-
-function authProvided(request) {
-  return (request.body.key !== undefined);
-}
+// auth keys within the body => redis key
+var authKeys = {"key": "_gcmkey"}
 
 exports.sendMessage   = sendMessage;
-exports.authProvided  = authProvided;
-exports.setAuthData   = setAuthData;
-exports.getAuthData   = getAuthData;
+exports.authKeys      = authKeys;
 exports.authCallback  = authCallback;
