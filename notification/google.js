@@ -18,6 +18,8 @@ redisClient.on("error", function (err) {
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
+  log.debug(JSON.stringify(payload));
+
   try {
     gcm.send(request.body.key, request.body.deviceId, payload, function (err, res) {
       if (err) {
