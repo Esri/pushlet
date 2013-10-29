@@ -242,8 +242,7 @@ function authCallback(err, replies, request, response) {
   }
 }
 
-// auth keys within the body => redis key
-var authKeys = {"cert": "_cert", "key": "_key"}
+var authKeys = [{"request_key": "cert", "redis_key": "_cert"}, {"request_key": "key", "redis_key": "_key"}]
 
 exports.sendMessage   = sendMessage;
 exports.authKeys      = authKeys;

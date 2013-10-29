@@ -12,13 +12,13 @@ redisClient.on("error", function (err) {
   log.error("Redis Error: " + err);
 });
 
-function authKeyString(appId, mode, key) {
-  return appId + "_" + mode + key;
+function authKeyString(appId, mode, redis_key) {
+  return appId + "_" + mode + redis_key;
 }
 
 function authProvided(request, keys) {
-  for (var key in keys) {
-    if (request.body[key] === undefined)
+  for (var i in keys) {
+    if (request.body[keys[i].request_key] === undefined)
       return false;
   }
   return true;
@@ -29,8 +29,8 @@ function getAuthData(request, keys) {
       mode  = request.body.mode;
 
   var ret = [];
-  for (var key in keys) {
-    ret.push( [ "get", authKeyString(appId, mode, keys[key]) ] );
+  for (var i in keys) {
+    ret.push( [ "get", authKeyString(appId, mode, keys[i].redis_key) ] );
   }
   return ret;
 }
@@ -40,8 +40,8 @@ function setAuthData(request, keys) {
       mode  = request.body.mode;
 
   var ret = [];
-  for (var key in keys) {
-    ret.push( [ "set", authKeyString(appId, mode, keys[key]), request.body[key] ] );
+  for (var i in keys) {
+    ret.push( [ "set", authKeyString(appId, mode, keys[i].redis_key), request.body[keys[i].request_key] ] );
   }
   return ret;
 }
