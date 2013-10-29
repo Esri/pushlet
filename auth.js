@@ -59,11 +59,6 @@ function authenticateAndHandleRequest(request, response, handler) {
 
 // auth passed in, yay!
 function handleNewAuth (request, response, handler) {
-  var appId = request.body.appId,
-      mode  = request.body.mode,
-      cert  = request.body.cert,
-      key   = request.body.key;
-
   if (redisClient && redisClient.connected) {
     redisClient.multi(setAuthData(request, handler.authKeys)).exec(function (err, replies) {
       log.debug("Saved auth in Redis");
@@ -77,13 +72,10 @@ function handleNewAuth (request, response, handler) {
 
 // if there is no key or cert, see if one can be found
 function handleExistingAuth (request, response, handler) {
-  var appId = request.body.appId,
-      mode  = request.body.mode;
-
   // check redis for an existing auth for this appId
   if (redisClient && redisClient.connected) {
     redisClient.multi(getAuthData(request, handler.authKeys)).exec(function(err, replies) {
-      handler.authCallback(err, replies, request, response, appId, mode);
+      handler.authCallback(err, replies, request, response);
     });
   } else {
     log.info("No Redis connection, can't check for existing credentials");

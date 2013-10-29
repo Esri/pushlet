@@ -42,7 +42,10 @@ function sendMessage(request, response) {
   }
 }
 
-function authCallback(err, replies, request, response, appId, mode) {
+function authCallback(err, replies, request, response) {
+  var appId = request.body.appId,
+      mode  = request.body.mode;
+
   if (replies === undefined || replies.length !== 1 || replies[0] === null) {
     log.debug("No GCM key found in Redis for "+appId+" ("+mode+")");
     response.end(responder.err({ error: "Missing Key" }));

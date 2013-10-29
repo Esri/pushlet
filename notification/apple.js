@@ -230,7 +230,10 @@ function sendMessage(request, response) {
   connection.pushNotification(notification, notification.device);
 }
 
-function authCallback(err, replies, request, response, appId, mode) {
+function authCallback(err, replies, request, response) {
+  var appId = request.body.appId,
+      mode  = request.body.mode;
+
   if (replies === undefined || replies.length !== 2 || replies[0] === null || replies[1] === null) {
     log.debug("No cert found in Redis for "+appId+" ("+mode+")");
     response.end(responder.err({ error: "Missing Certificate" }));
