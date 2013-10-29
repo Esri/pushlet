@@ -2,6 +2,7 @@ var http      = require('http'),
     apns      = require('./notification/apple'),
     gcm       = require('./notification/google'),
     qs        = require('querystring'),
+    auth      = require('./auth'),
     responder = require('./responder'),
     log       = require('./log').logger;
 
@@ -48,7 +49,14 @@ function handleRequest(request, response, handler) {
   }
 
   log.debug("Push to " + request.body.deviceId);
-  handler.handleMessage(request, response);
+  if (handler.authProvided(request)) {
+    // If a certificate is provided, store it in redis
+    log.debug("New auth provided in request");
+    auth.handleNewAuth(request, response, handler.setAuthData, handler.sendMessage);
+  } else {
+    log.debug("No auth provided, attempt to look up in the cache");
+    auth.handleExistingAuth(request, response, handler.getAuthData, handler.authCallback);
+  }
 }
 
 function handleNotFound(response) {

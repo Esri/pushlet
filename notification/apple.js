@@ -1,8 +1,7 @@
 var apns = require('apn'),
     uuid = require('node-uuid'),
     responder = require('../responder'),
-    log  = require('../log').logger,
-    auth = require('../auth');
+    log  = require('../log').logger;
 
 var config = require('../config.json');
 
@@ -266,21 +265,8 @@ function authProvided(request) {
   return (request.body.cert !== undefined && request.body.key !== undefined);
 }
 
-// entry for the module, handle the message
-function handleMessage (request, response) {
-
-  if (authProvided(request)) {
-    // If a certificate is provided, store it in redis
-    log.debug("New auth provided in request");
-    auth.handleNewAuth(request, response, setAuthData, sendMessage);
-  } else {
-    log.debug("No auth provided, attempt to look up in the cache");
-    auth.handleExistingAuth(request, response, getAuthData, authCallback);
-  }
-}
-
-exports.handleMessage = handleMessage;
 exports.sendMessage   = sendMessage;
+exports.authProvided  = authProvided;
 exports.setAuthData   = setAuthData;
 exports.getAuthData   = getAuthData;
 exports.authCallback  = authCallback;
