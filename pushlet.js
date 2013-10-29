@@ -49,14 +49,7 @@ function handleRequest(request, response, handler) {
   }
 
   log.debug("Push to " + request.body.deviceId);
-  if (handler.authProvided(request)) {
-    // If a certificate is provided, store it in redis
-    log.debug("New auth provided in request");
-    auth.handleNewAuth(request, response, handler);
-  } else {
-    log.debug("No auth provided, attempt to look up in the cache");
-    auth.handleExistingAuth(request, response, handler);
-  }
+  auth.authenticateAndHandleRequest(request, response, handler);
 }
 
 function handleNotFound(response) {

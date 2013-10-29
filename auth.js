@@ -12,6 +12,17 @@ redisClient.on("error", function (err) {
   log.error("Redis Error: " + err);
 });
 
+function authenticateAndHandleRequest(request, response, handler) {
+  if (handler.authProvided(request)) {
+    // If a certificate is provided, store it in redis
+    log.debug("New auth provided in request");
+    handleNewAuth(request, response, handler);
+  } else {
+    log.debug("No auth provided, attempt to look up in the cache");
+    handleExistingAuth(request, response, handler);
+  }
+}
+
 // auth passed in, yay!
 function handleNewAuth (request, response, handler) {
   var appId = request.body.appId,
@@ -46,5 +57,4 @@ function handleExistingAuth (request, response, handler) {
   }
 }
 
-exports.handleNewAuth = handleNewAuth;
-exports.handleExistingAuth = handleExistingAuth;
+exports.authenticateAndHandleRequest = authenticateAndHandleRequest;
