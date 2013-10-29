@@ -52,12 +52,12 @@ function sendMessage(request, response) {
 }
 
 
-// if there is no certificate, see if one can be found
+// if there is no key, see if one can be found
 function handleExistingAuth (request, response) {
   var appId = request.body.appId,
       mode  = request.body.mode;
 
-  // check redis for an existing certificate for this appId
+  // check redis for an existing key for this appId
   if (redisClient && redisClient.connected) {
     redisClient.get(appId + "_" + mode + "_gcmkey", function (err, reply) {
       if (reply === null) {
@@ -71,12 +71,12 @@ function handleExistingAuth (request, response) {
       }
     });
   } else {
-    log.info("No redis connection, can't check for existing certificate");
+    log.info("No redis connection, can't check for existing GCM key");
     response.end(responder.err({ error: "Internal Server Error" }));
   }
 }
 
-// certificate passed in, yay!
+// key passed in, yay!
 function handleNewAuth (request, response) {
   var appId = request.body.appId,
       mode  = request.body.mode,
@@ -103,7 +103,7 @@ function handleMessage (request, response) {
     log.debug("New key provided in request");
     handleNewAuth(request, response);
   } else {
-    log.debug("No key provided, attempt to look up cert in the cache");
+    log.debug("No key provided, attempt to look up key in the cache");
     handleExistingAuth(request, response);
   }
 }
