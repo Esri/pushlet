@@ -2,19 +2,9 @@ var apns = require('apn'),
     uuid = require('node-uuid'),
     responder = require('../responder'),
     log  = require('../log').logger,
-    redis = require('redis');
+    auth = require('../auth');
 
 var config = require('../config.json');
-
-
-// set up redis
-var port = config.redis.port || 6379,
-    host = config.redis.host || 'localhost';
-
-var redisClient = redis.createClient(port, host);
-redisClient.on("error", function (err) {
-  log.error("Redis Error: " + err);
-});
 
 // place to hold status for open connections
 var status = { };
@@ -243,26 +233,19 @@ function sendMessage(request, response) {
 
 // if there is no certificate, see if one can be found
 function handleExistingAuth (request, response) {
-  var appId = request.body.appId,
-      mode  = request.body.mode;
+  auth.handleExistingAuth(request, response, getAuthData, authCallback);
+}
 
-  // check redis for an existing certificate for this appId
-  if (redisClient && redisClient.connected) {
-    redisClient.multi(getAuthData(appId, mode)).exec(function (err, replies) {
-      if (replies === undefined || replies.length !== 2 || replies[0] === null || replies[1] === null) {
-        log.debug("No cert found in Redis for "+appId+" ("+mode+")");
-        response.end(responder.err({ error: "Missing Certificate" }));
-      } else {
-        log.debug("Found a cert in Redis for "+appId+" ("+mode+")");
-        request.body.cert = replies[0];
-        request.body.key = replies[1];
-
-        sendMessage(request, response);
-      }
-    });
+function authCallback(err, replies, request, response, appId, mode) {
+  if (replies === undefined || replies.length !== 2 || replies[0] === null || replies[1] === null) {
+    log.debug("No cert found in Redis for "+appId+" ("+mode+")");
+    response.end(responder.err({ error: "Missing Certificate" }));
   } else {
-    log.info("No redis connection, can't check for existing certificate");
-    response.end(responder.err({ error: "Internal Server Error" }));
+    log.debug("Found a cert in Redis for "+appId+" ("+mode+")");
+    request.body.cert = replies[0];
+    request.body.key = replies[1];
+
+    sendMessage(request, response);
   }
 }
 
@@ -285,22 +268,8 @@ function authKeyString(appId, mode) {
 }
 // certificate passed in, yay!
 function handleNewAuth (request, response) {
-  var appId = request.body.appId,
-      mode  = request.body.mode,
-      cert  = request.body.cert,
-      key   = request.body.key;
-
-  if (redisClient && redisClient.connected) {
-    redisClient.multi(setAuthData(appId, mode, key, cert)).exec(function (err, replies) {
-      log.debug("Saved cert in Redis");
-      sendMessage(request, response);
-    });
-  } else {
-    log.info("No Redis connection, can't store cert");
-    sendMessage(request, response);
-  }
+  auth.handleNewAuth(request, response, setAuthData, sendMessage);
 }
-
 
 // entry for the module, handle the message
 function handleMessage (request, response) {
@@ -316,3 +285,6 @@ function handleMessage (request, response) {
 }
 
 exports.handleMessage = handleMessage;
+exports.setAuthData   = setAuthData;
+exports.getAuthData   = getAuthData;
+exports.authCallback  = authCallback;
