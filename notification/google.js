@@ -79,11 +79,15 @@ function handleExistingAuth (request, response) {
 }
 
 function getAuthData(appId, mode) {
-  return [ [ "get", appId + "_" + mode + "_gcmkey" ] ]
+  return [ [ "get", authKeyString(appId, mode) ] ]
 }
 
 function setAuthData(appId, mode, key) {
-  return [ [ "set", appId + "_" + mode + "_gcmkey", key] ]
+  return [ [ "set", authKeyString(appId, mode), key] ]
+}
+
+function authKeyString(appId, mode) {
+  return appId + "_" + mode + "_gcmkey";
 }
 
 // key passed in, yay!

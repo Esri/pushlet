@@ -267,15 +267,22 @@ function handleExistingAuth (request, response) {
 }
 
 function getAuthData(appId, mode) {
-  return [ [ "get", appId + "_" + mode + "_cert" ],
-           [ "get", appId + "_" + mode + "_key" ] ]
+  return [ [ "get", authCertString(appId, mode) ],
+           [ "get", authKeyString(appId, mode) ] ]
 }
 
 function setAuthData(appId, mode, key, cert) {
-  return [ [ "set", appId + "_" + mode + "_cert", cert ],
-           [ "set", appId + "_" + mode + "_key", key ] ]
+  return [ [ "set", authCertString(appId, mode), cert ],
+           [ "set", authKeyString(appId, mode), key ] ]
 }
 
+function authCertString(appId, mode) {
+  return appId + "_" + mode + "_cert";
+}
+
+function authKeyString(appId, mode) {
+  return appId + "_" + mode + "_key";
+}
 // certificate passed in, yay!
 function handleNewAuth (request, response) {
   var appId = request.body.appId,
