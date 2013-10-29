@@ -1,5 +1,6 @@
-var redis = require('redis'),
-    log  = require('./log').logger;
+var redis     = require('redis'),
+    responder = require('./responder'),
+    log       = require('./log').logger;
 
 var config = require('./config.json');
 
@@ -46,6 +47,32 @@ function setAuthData(request, keys) {
   return ret;
 }
 
+function authCallback(err, replies, request, response, handler) {
+  var appId = request.body.appId,
+      mode  = request.body.mode;
+
+  var keys = handler.authKeys;
+
+  if (replies === undefined || replies.length !== keys.length) {
+    log.debug("No cert found in Redis for "+appId+" ("+mode+")");
+    response.end(responder.err({ error: "Missing credentials" }));
+  } else {
+
+    for (var i in keys) {
+      if (replies[i] === null) {
+        log.debug("No " + keys[i].request_key + " found in Redis for "+appId+" ("+mode+")");
+        response.end(responder.err({ error: "Missing credentials" }));
+        return;
+      }
+
+      log.debug("Found a " + keys[i].request_key + " in Redis for "+appId+" ("+mode+")");
+      request.body[keys[i].request_key] = replies[i];
+    }
+
+    handler.sendMessage(request, response);
+  }
+}
+
 function authenticateAndHandleRequest(request, response, handler) {
   if (authProvided(request, handler.authKeys)) {
     // If a certificate is provided, store it in redis
@@ -75,7 +102,7 @@ function handleExistingAuth (request, response, handler) {
   // check redis for an existing auth for this appId
   if (redisClient && redisClient.connected) {
     redisClient.multi(getAuthData(request, handler.authKeys)).exec(function(err, replies) {
-      handler.authCallback(err, replies, request, response);
+      authCallback(err, replies, request, response, handler);
     });
   } else {
     log.info("No Redis connection, can't check for existing credentials");

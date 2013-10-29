@@ -5,6 +5,8 @@ var apns = require('apn'),
 
 var config = require('../config.json');
 
+var authKeys = [{"request_key": "cert", "redis_key": "_cert"}, {"request_key": "key", "redis_key": "_key"}];
+
 // place to hold status for open connections
 var status = { };
 
@@ -226,24 +228,5 @@ function sendMessage(request, response) {
   connection.pushNotification(notification, notification.device);
 }
 
-function authCallback(err, replies, request, response) {
-  var appId = request.body.appId,
-      mode  = request.body.mode;
-
-  if (replies === undefined || replies.length !== 2 || replies[0] === null || replies[1] === null) {
-    log.debug("No cert found in Redis for "+appId+" ("+mode+")");
-    response.end(responder.err({ error: "Missing Certificate" }));
-  } else {
-    log.debug("Found a cert in Redis for "+appId+" ("+mode+")");
-    request.body.cert = replies[0];
-    request.body.key = replies[1];
-
-    sendMessage(request, response);
-  }
-}
-
-var authKeys = [{"request_key": "cert", "redis_key": "_cert"}, {"request_key": "key", "redis_key": "_key"}]
-
 exports.sendMessage   = sendMessage;
 exports.authKeys      = authKeys;
-exports.authCallback  = authCallback;
