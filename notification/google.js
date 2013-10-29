@@ -2,8 +2,6 @@ var gcm = require('dpush'),
     responder = require('../responder'),
     log  = require('../log').logger;
 
-var config = require('../config.json');
-
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
