@@ -23,7 +23,6 @@ var errorMap = {
   255: "Unknown Error"
 };
 
-
 // get a connection from the pool if possible, otherwise create a new connection
 function getConnection (name, options, uuid) {
   var connection = connections[name];
@@ -89,8 +88,6 @@ function getConnection (name, options, uuid) {
       }
     });
 
-
-
     connections[name] = connection;
   } else {
     log.debug("Found existing connection for "+name);
@@ -98,7 +95,6 @@ function getConnection (name, options, uuid) {
 
   return connection;
 }
-
 
 // callback from sendMesage error callback, known error state
 function errorCallback(err, options) {
