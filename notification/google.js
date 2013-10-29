@@ -61,13 +61,13 @@ function handleExistingAuth (request, response) {
 
   // check redis for an existing key for this appId
   if (redisClient && redisClient.connected) {
-    redisClient.get(appId + "_" + mode + "_gcmkey", function (err, reply) {
-      if (reply === null) {
+    redisClient.multi(getAuthData(appId, mode)).exec(function (err, replies) {
+      if (replies === undefined || replies.length !== 1 || replies[0] === null) {
         log.debug("No GCM key found in Redis for "+appId+" ("+mode+")");
         response.end(responder.err({ error: "Missing Key" }));
       } else {
         log.debug("Found a GCM key in Redis for "+appId+" ("+mode+")");
-        request.body.key = reply;
+        request.body.key = replies[0];
 
         sendMessage(request, response);
       }
@@ -78,6 +78,14 @@ function handleExistingAuth (request, response) {
   }
 }
 
+function getAuthData(appId, mode) {
+  return [ [ "get", appId + "_" + mode + "_gcmkey" ] ]
+}
+
+function setAuthData(appId, mode, key) {
+  return [ [ "set", appId + "_" + mode + "_gcmkey", key] ]
+}
+
 // key passed in, yay!
 function handleNewAuth (request, response) {
   var appId = request.body.appId,
@@ -85,7 +93,7 @@ function handleNewAuth (request, response) {
       key   = request.body.key;
 
   if (redisClient && redisClient.connected) {
-    redisClient.set(appId + "_" + mode + "_gcmkey", key, function (err, replies) {
+    redisClient.multi(setAuthData(appId, mode, key)).exec(function (err, replies) {
       log.debug("Saved GCM key in Redis");
       sendMessage(request, response);
     });

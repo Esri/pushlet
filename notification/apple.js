@@ -248,14 +248,14 @@ function handleExistingAuth (request, response) {
 
   // check redis for an existing certificate for this appId
   if (redisClient && redisClient.connected) {
-    redisClient.multi([ [ "mget", appId + "_" + mode + "_cert", appId + "_" + mode + "_key" ]]).exec(function (err, replies) {
-      if (replies === undefined || replies.length !== 1 || replies[0].length !== 2 || replies[0][0] === null || replies[0][1] === null) {
+    redisClient.multi(getAuthData(appId, mode)).exec(function (err, replies) {
+      if (replies === undefined || replies.length !== 2 || replies[0] === null || replies[1] === null) {
         log.debug("No cert found in Redis for "+appId+" ("+mode+")");
         response.end(responder.err({ error: "Missing Certificate" }));
       } else {
         log.debug("Found a cert in Redis for "+appId+" ("+mode+")");
-        request.body.cert = replies[0][0];
-        request.body.key = replies[0][1];
+        request.body.cert = replies[0];
+        request.body.key = replies[1];
 
         sendMessage(request, response);
       }
@@ -266,6 +266,16 @@ function handleExistingAuth (request, response) {
   }
 }
 
+function getAuthData(appId, mode) {
+  return [ [ "get", appId + "_" + mode + "_cert" ],
+           [ "get", appId + "_" + mode + "_key" ] ]
+}
+
+function setAuthData(appId, mode, key, cert) {
+  return [ [ "set", appId + "_" + mode + "_cert", cert ],
+           [ "set", appId + "_" + mode + "_key", key ] ]
+}
+
 // certificate passed in, yay!
 function handleNewAuth (request, response) {
   var appId = request.body.appId,
@@ -274,7 +284,7 @@ function handleNewAuth (request, response) {
       key   = request.body.key;
 
   if (redisClient && redisClient.connected) {
-    redisClient.multi([ [ "mset", appId + "_" + mode + "_cert", cert, appId + "_" + mode + "_key", key ]]).exec(function (err, replies) {
+    redisClient.multi(setAuthData(appId, mode, key, cert)).exec(function (err, replies) {
       log.debug("Saved cert in Redis");
       sendMessage(request, response);
     });
