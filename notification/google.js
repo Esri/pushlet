@@ -78,10 +78,14 @@ function handleNewAuth (request, response) {
   auth.handleNewAuth(request, response, setAuthData, sendMessage);
 }
 
+function authProvided(request) {
+  return (request.body.key !== undefined);
+}
+
 // entry for the module, handle the message
 function handleMessage (request, response) {
 
-  if (request.body.key !== undefined) {
+  if (authProvided(request)) {
     // If a key is provided, store it in redis
     log.debug("New key provided in request");
     handleNewAuth(request, response);

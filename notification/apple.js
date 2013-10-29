@@ -271,10 +271,14 @@ function handleNewAuth (request, response) {
   auth.handleNewAuth(request, response, setAuthData, sendMessage);
 }
 
+function authProvided(request) {
+  return (request.body.cert !== undefined && request.body.key !== undefined);
+}
+
 // entry for the module, handle the message
 function handleMessage (request, response) {
 
-  if (request.body.cert !== undefined && request.body.key !== undefined) {
+  if (authProvided(request)) {
     // If a certificate is provided, store it in redis
     log.debug("New cert provided in request");
     handleNewAuth(request, response);
