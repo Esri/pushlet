@@ -81,6 +81,8 @@ var server = http.createServer(function (request, response) {
     handlePostData(request, response, handleAPNMessage);
   } else if (request.url === '/message/gcm' && request.method === 'POST') {
     handlePostData(request, response, handleGCMMessage);
+  } else if (request.url === '/ping') {
+    response.end("pong");
   } else {
     response.writeHead(404);
     response.end("not found");
