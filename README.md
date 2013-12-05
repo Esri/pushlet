@@ -26,10 +26,12 @@ Configuration lives in `config.json`, it is advised that you run as a non-privil
 * cert - optional - If no cert is provided, will use an existing cert for the given appId. If no existing cert is loaded, will return an error.
 * key - optional - The private key for the given cert.
 * notification - required
-   * payload - optional - The raw payload to send to the device. See the APNS docs for more info.
-   * alert - optional - Text to display in the push notification.
-   * badge - optional - The badge number to display on the app icon.
-   * sound - optional - Sound file to play for the push notification.
+  * alert - optional - String or Object - Text to display in the push notification. (is actually sent in the APNS payload as aps.alert)
+    * If alert is an object, you can specify the other properties of the notification payload under the alert object. See the [Apple docs](https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html#//apple_ref/doc/uid/TP40008194-CH100-SW1)
+  * badge - optional - The badge number to display on the app icon.  (is actually sent as aps.badge)
+  * sound - optional - Sound file to play for the push notification.  (is actually sent as aps.sound)
+  * content-available - optional - Send "1" to indicate new content is available (is actually sent as aps.content-available)
+  * other properties - optional - Any other properties are also sent in the APNS payload
 * timeout - optional (default 1000 ms) - Since Apple does not send an acknowledgement packet on successful delivery of a notification, wait this long for an error message, and if no error is received, assumes it was successful. Set to lower values or 0 if you do not care about confirming whether the message was sent successfully.
 
 ```

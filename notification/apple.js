@@ -1,5 +1,6 @@
 var apns = require('apn'),
     uuid = require('node-uuid'),
+    responder = require('../responder'),
     log  = require('../log').logger,
     redis = require('redis');
 
@@ -136,11 +137,11 @@ function errorCallback(err, options) {
     if (errorMap[err] === undefined) {
       errResponse = err.toString();
     }
-    response.end(JSON.stringify({ response: "error", error: errResponse, error_description: options.errorDescription }));
+    response.end(responder.err({ error: errResponse, error_description: options.errorDescription }));
   } else {
     // whoa, something weird happened, log it and return a result
     log.warn("errorCallback returned with unknown error: " + err);
-    response.end(JSON.stringify({ response: "error", error: "Unknown" }));
+    response.end(responder.err({ error: "Unknown Error" }));
   }
   status[options.id] = undefined;
 }
@@ -162,9 +163,9 @@ function notificationCallback(id) {
 
     // if we have a timeout of "0", just notify that we sent it
     if (request.body.timeout === 0) {
-      response.end(JSON.stringify({ response: "sent" }));
+      response.end(responder.sent());
     } else {
-      response.end(JSON.stringify({ response: "ok" }));
+      response.end(responder.ok());
     }
   }
 }
@@ -250,7 +251,7 @@ function handleExistingAuth (request, response) {
     redisClient.multi([ [ "mget", appId + "_" + mode + "_cert", appId + "_" + mode + "_key" ]]).exec(function (err, replies) {
       if (replies === undefined || replies.length !== 1 || replies[0].length !== 2 || replies[0][0] === null || replies[0][1] === null) {
         log.debug("No cert found in Redis for "+appId+" ("+mode+")");
-        response.end(JSON.stringify({ "response": "error", "error": "missing certificate" }));
+        response.end(responder.err({ error: "Missing Certificate" }));
       } else {
         log.debug("Found a cert in Redis for "+appId+" ("+mode+")");
         request.body.cert = replies[0][0];
@@ -261,7 +262,7 @@ function handleExistingAuth (request, response) {
     });
   } else {
     log.info("No redis connection, can't check for existing certificate");
-    response.end(JSON.stringify({ "status": "error", "error": "Internal server error" }));
+    response.end(responder.err({ error: "Internal Server Error" }));
   }
 }
 
