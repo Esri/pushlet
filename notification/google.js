@@ -18,7 +18,7 @@ redisClient.on("error", function (err) {
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
-  if (payload.debug) {
+  if (request.body.debug) {
     log.debug("Incoming Payload (GCM)", payload);
   }
 
@@ -35,7 +35,7 @@ function sendMessage(request, response) {
           error = 'Unknown Error';
         }
 
-        if (payload.debug) {
+        if (request.body.debug) {
           log.debug("GCM Response", err.toString());
         }
 
