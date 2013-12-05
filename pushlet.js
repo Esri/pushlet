@@ -56,6 +56,11 @@ function handleNotFound(response) {
 }
 
 var server = http.createServer(function (request, response) {
+  if (request.url === "/ping") {
+    response.end("pong");
+    return;
+  }
+
   if (request.method !== 'POST') {
     handleNotFound(response);
   }
