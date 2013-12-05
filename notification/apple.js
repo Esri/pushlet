@@ -174,6 +174,10 @@ function notificationCallback(id) {
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
+  if (payload.debug) {
+    log.debug("Incoming Payload (iOS)", payload);
+  }
+
   var timeout = config.connectionTimeout || 1000;
 
   // set up the connection options
@@ -219,7 +223,9 @@ function sendMessage(request, response) {
 
   notification.uuid = uuid.v4();
 
-  log.debug(JSON.stringify(notification));
+  if (payload.debug) {
+    log.debug("Outgoing Payload (iOS)", notification);
+  }
 
   // stash the connection away
   status[notification.uuid] = {
