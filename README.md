@@ -33,6 +33,7 @@ Configuration lives in `config.json`, it is advised that you run as a non-privil
   * content-available - optional - Send "1" to indicate new content is available (is actually sent as aps.content-available)
   * other properties - optional - Any other properties are also sent in the APNS payload
 * timeout - optional (default 1000 ms) - Since Apple does not send an acknowledgement packet on successful delivery of a notification, wait this long for an error message, and if no error is received, assumes it was successful. Set to lower values or 0 if you do not care about confirming whether the message was sent successfully.
+* debug - optional (default false) - If true, the application log will include the payload received and the payload sent to APNS.
 
 ```
 {
