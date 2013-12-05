@@ -212,8 +212,7 @@ function sendMessage(request, response) {
     delete payload.alert;
   }
 
-  if (payload.payload !== undefined && 
-      Object.keys(payload.payload).length !== 0) {
+  if (payload.payload !== undefined) { 
     notification.payload = payload;
   }
 
