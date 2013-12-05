@@ -18,6 +18,10 @@ redisClient.on("error", function (err) {
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
+  if (payload.debug) {
+    log.debug("Incoming Payload (GCM)", payload);
+  }
+
   try {
     gcm.send(request.body.key, request.body.deviceId, payload, function (err, res) {
       if (err) {
@@ -30,6 +34,11 @@ function sendMessage(request, response) {
         } else {
           error = 'Unknown Error';
         }
+
+        if (payload.debug) {
+          log.debug("GCM Response", err.toString());
+        }
+
         response.end(responder.err({ error: error }));
       } else {
         // we should only be sending a single id
