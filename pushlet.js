@@ -7,6 +7,8 @@ var http      = require('http'),
 
 var config = require('./config.json');
 
+http.globalAgent.maxSockets = 300;
+
 function handlePostData (request, response, handler) {
   var body = '';
 
