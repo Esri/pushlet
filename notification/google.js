@@ -15,8 +15,37 @@ redisClient.on("error", function (err) {
 });
 
 
+// GCM requires that all things be strings, and cannot deserialize
+// numbers or boolean.  This works around that by converting all
+// numbers and booleans to strings.
+function workAroundGCMLimitations (input) {
+  var i, output;
+  if (typeof input === 'object' && Array.isArray(input) !== true) {
+    output = { };
+    var keys = Object.keys(input);
+
+    for (i = 0; i < keys.length; i++) {
+      output[keys[i]] = workAroundGCMLimitations(input[keys[i]]);
+    }
+
+    return output;
+  } else if (Array.isArray(input)) {
+    output = [ ];
+
+    for (i = 0; i < input.length; i++) {
+      output[i] = workAroundGCMLimitations(input[i]);
+    }
+
+    return output;
+  } else if (typeof input === 'number' || typeof input === 'boolean') {
+    return String(input);
+  } else {
+    return input;
+  }
+}
+
 function sendMessage(request, response) {
-  var payload = request.body.notification;
+  var payload = workAroundGCMLimitations(request.body.notification);
 
   if (request.body.debug) {
     log.debug("Incoming Payload (GCM)", payload);
