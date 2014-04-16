@@ -61,7 +61,8 @@ var payload = JSON.stringify({
   notification: {
     alert: message
   },
-  timeout: timeout
+  timeout: timeout,
+  debug: true
 });
 console.log(payload);
 
@@ -71,5 +72,6 @@ request(pushletBaseURL+'message/apn', {
   headers: ['Content-Type: application/json']
 }, function(error, response, body){
   console.log(body);
+  console.log(error);
 });
 

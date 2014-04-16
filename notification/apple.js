@@ -174,8 +174,8 @@ function notificationCallback(id) {
 function sendMessage(request, response) {
   var payload = request.body.notification;
 
-  if (payload.debug) {
-    log.debug("Incoming Payload (iOS)", payload);
+  if (request.body.debug) {
+    log.debug("Incoming Payload (iOS)", JSON.stringify(payload));
   }
 
   var timeout = config.connectionTimeout || 1000;
@@ -202,29 +202,40 @@ function sendMessage(request, response) {
   // set up the notification based on data passed
   var notification = new apns.Notification();
 
-  if (payload.badge !== undefined) {
-    notification.badge = payload.badge;
-    delete payload.badge;
+  // Build the "aps" key ourself, don't trust the node-apn library to do it
+  var aps = {};
+
+  if (payload['badge'] !== undefined) {
+    aps['badge'] = payload['badge'];
+    delete payload['badge'];
   }
 
-  if (payload.sound !== undefined) {
-    notification.sound = payload.sound;
-    delete payload.sound;
+  if (payload['sound'] !== undefined) {
+    aps['sound'] = payload['sound'];
+    delete payload['sound'];
   }
 
-  if (payload.alert !== undefined) {
-    notification.alert = payload.alert;
-    delete payload.alert;
+  if (payload['alert'] !== undefined) {
+    aps['alert'] = payload['alert'];
+    delete payload['alert'];
   }
 
-  if (payload.payload !== undefined) { 
-    notification.payload = payload;
+  if (payload['content-available'] !== undefined) {
+    aps['content-available'] = payload['content-available'];
+    delete payload['content-available'];
   }
+
+  if (Object.keys(aps).length > 0) {
+    payload.aps = aps;
+  }
+
+  // Set all the properties including "aps" on the "payload" (node-apn's place to put custom properties)
+  notification.payload = payload;
 
   notification.uuid = uuid.v4();
 
-  if (payload.debug) {
-    log.debug("Outgoing Payload (iOS)", notification);
+  if (request.body.debug) {
+    log.debug("Outgoing Payload (iOS)", JSON.stringify(notification));
   }
 
   // stash the connection away
