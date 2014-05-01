@@ -90,17 +90,21 @@ function getConnection (name, options, uuid) {
       }
     });
 
-    connection.on('socketError', function () {
-      console.dir(arguments);
+    connection.on('socketError', function (err) {
       log.warn("Socket error for "+this.options.name);
-      // remove the connection from the connection pool
-      if (this.options && this.options.name) {
-        connections[this.options.name] = undefined;
+      log.warn(err);
+      if(err.message.indexOf('expired') >= 0) {
+        errorCallback("expiredCertificate", {uuid: uuid});
+      } else {
         errorCallback("socketError", {uuid: uuid});
       }
+      // remove the connection from the connection pool
+      if (this.options && this.options.name) {
+        connections[this.options.name].notificationBuffer = [];
+        connections[this.options.name].shutdown();
+        connections[this.options.name] = undefined;
+      }
     });
-
-
 
     connections[name] = connection;
   } else {
