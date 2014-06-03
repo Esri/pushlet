@@ -24,8 +24,8 @@ function workAroundGCMLimitations (input) {
   // type detection
   var isObject = !!input && Object.prototype.toString.call(input) === "[object Object]";
   var isArray = Array.isArray(input);
-  var isNum = typeof input === 'number';
-  var isBool = typeof input === 'boolean';
+  var isNumber = typeof input === 'number';
+  var isBoolean = typeof input === 'boolean';
 
   if (isObject) {
     output = { };
@@ -44,7 +44,7 @@ function workAroundGCMLimitations (input) {
     }
 
     return output;
-  } else if (isNum || isBoolean) {
+  } else if (isNumber || isBoolean) {
     return String(input);
   } else {
     return input;
