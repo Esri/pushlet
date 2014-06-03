@@ -20,7 +20,14 @@ redisClient.on("error", function (err) {
 // numbers and booleans to strings.
 function workAroundGCMLimitations (input) {
   var i, output;
-  if (typeof input === 'object' && Array.isArray(input) !== true) {
+
+  // type detection
+  var isObject = !!input && Object.prototype.toString.call(input) === "[object Object]";
+  var isArray = Array.isArray(input);
+  var isNumber = typeof input === 'number';
+  var isBoolean = typeof input === 'boolean';
+
+  if (isObject) {
     output = { };
     var keys = Object.keys(input);
 
@@ -29,7 +36,7 @@ function workAroundGCMLimitations (input) {
     }
 
     return output;
-  } else if (Array.isArray(input)) {
+  } else if (isArray) {
     output = [ ];
 
     for (i = 0; i < input.length; i++) {
@@ -37,7 +44,7 @@ function workAroundGCMLimitations (input) {
     }
 
     return output;
-  } else if (typeof input === 'number' || typeof input === 'boolean') {
+  } else if (isNumber || isBoolean) {
     return String(input);
   } else {
     return input;
