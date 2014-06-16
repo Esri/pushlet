@@ -2,6 +2,7 @@ var http      = require('http'),
     apns      = require('./notification/apple'),
     gcm       = require('./notification/google'),
     qs        = require('querystring'),
+    auth      = require('./auth'),
     responder = require('./responder'),
     log       = require('./log').logger;
 
@@ -49,7 +50,8 @@ function handleRequest(request, response, handler) {
     request.body.timeout = config.timeout;
   }
 
-  handler.handleMessage(request, response);
+  log.debug("Push to " + request.body.deviceId);
+  auth.authenticateAndHandleRequest(request, response, handler);
 }
 
 function handleNotFound(response) {
