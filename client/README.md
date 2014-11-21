@@ -129,7 +129,7 @@ If you are sending to a device token that is not registered with your applicatio
 Common causes of this error are 
 
 * invalid characters in the device token (it should only contain a-z 0-9, no spaces or other punctuation)
-* the device token belongs to a different application genereated with a different certificate
+* the device token belongs to a different application (sent using the wrong certificate)
 
 ### Other Errors
 
